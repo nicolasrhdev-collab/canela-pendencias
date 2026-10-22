@@ -2,7 +2,7 @@
 
 ## Pendências
 
-Compra, serviço, tarefa e pagamento têm: título, tipo, apartamento (105, 306 ou Ambos), urgência (Essencial, Útil, Extra), responsáveis, "presencial" ou "dá para fazer de casa", links de sugestão (com o escolhido marcado) e observações.
+Compra, serviço, tarefa e pagamento têm: título, tipo, apartamento (105, 306 ou Ambos), se é essencial (bandeira amarela; o resto não leva marca), responsáveis, "presencial" ou "dá para fazer de casa", links de sugestão (com o escolhido marcado) e observações.
 
 | Tipo | Caminho do status |
 |---|---|

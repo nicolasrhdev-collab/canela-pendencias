@@ -1,5 +1,5 @@
 /* Regras de negócio: status de cada pendência, contagem do inventário, eventos do calendário e automações. */
-import type { Apto, Banco, Compra, Item, Op, Pendencia, PendCompra, PendTarefa, Pessoa, RegistroHist, Tipo, Urgencia } from '../types';
+import type { Apto, Banco, Compra, Item, Op, Pendencia, PendCompra, PendTarefa, Pessoa, RegistroHist, Tipo } from '../types';
 import { br } from './datas';
 import { brl } from './formatos';
 
@@ -9,8 +9,6 @@ export const TIPOS: Record<Tipo, { rotulo: string; icone: string }> = {
   servico: { rotulo: 'Serviço', icone: 'handyman' },
   pagamento: { rotulo: 'Pagamento', icone: 'payments' },
 };
-export const URG_CLASSE: Record<Urgencia, 'essencial' | 'util' | 'extra'> = { Essencial: 'essencial', 'Útil': 'util', Extra: 'extra' };
-const ORDEM_URG: Record<Urgencia, number> = { Essencial: 0, 'Útil': 1, Extra: 2 };
 
 export type Coluna = 'pendente' | 'aguardando' | 'concluido';
 export type TomStatus = Coluna | 'atrasado';
@@ -49,6 +47,12 @@ export function contagem(db: Banco, p: PendCompra): Contagem {
   let cam = 0;
   (p.compras || []).forEach((c) => { if (!c.chegou) cam += c.qtd; });
   return { tem, cam, falta: Math.max(0, precisa - tem - cam), precisa };
+}
+
+/** Barra do card: a compra conta unidades; os outros tipos são uma unidade só, na cor da coluna em que estão. */
+export function progresso(db: Banco, p: Pendencia, sit: Situacao): Contagem {
+  if (p.tipo === 'compra') return contagem(db, p);
+  return { tem: sit.coluna === 'concluido' ? 1 : 0, cam: sit.coluna === 'aguardando' ? 1 : 0, falta: sit.coluna === 'pendente' ? 1 : 0, precisa: 1 };
 }
 
 export function contagemItem(db: Banco, it: Item): Contagem {
@@ -155,7 +159,7 @@ export function meta(p: Pendencia, sit: Situacao, hoje: string): Meta {
   if (p.tipo === 'tarefa') {
     if (p.feito) return { icone: 'check_circle', texto: 'Feita', vencido: false };
     if (p.prazo) return p.prazo < hoje ? { icone: 'event_busy', texto: 'Venceu ' + br(p.prazo), vencido: true } : { icone: 'event', texto: 'Até ' + br(p.prazo), vencido: false };
-    return { icone: p.modo === 'casa' ? 'home' : 'location_on', texto: p.modo === 'casa' ? 'Dá para fazer de casa' : 'Presencial em Canela', vencido: false };
+    return { icone: 'event', texto: 'Sem prazo', vencido: false };
   }
   if (p.tipo === 'servico') {
     if (p.feito) return { icone: 'check_circle', texto: p.pago ? 'Feito e pago' : 'Feito', vencido: false };
@@ -168,7 +172,7 @@ export function meta(p: Pendencia, sit: Situacao, hoje: string): Meta {
   return { icone: 'event', texto: 'Vence ' + br(p.vencimento), vencido: false };
 }
 
-export function ordem(p: Pendencia, sit: Situacao) { return (sit.atrasado ? 0 : 10) + ORDEM_URG[p.urgencia]; }
+export function ordem(p: Pendencia, sit: Situacao) { return (sit.atrasado ? 0 : 10) + (p.urgencia === 'Essencial' ? 0 : 1); }
 
 export interface Evento {
   data: string;
@@ -196,6 +200,21 @@ export function eventos(db: Banco): Evento[] {
 
 export function hist(txt: string, quem: string | null, em: string): RegistroHist { return { txt, quem, em }; }
 export function idsEmCanela(pessoas: Pessoa[]) { return pessoas.filter((p) => p.local === 'canela').map((p) => p.id); }
+
+/** O adm: o marcado nas configurações, senão a primeira pessoa da lista. */
+export function idAdm(db: Banco): string | null {
+  const a = db.config.adm;
+  if (a && db.pessoas.some((p) => p.id === a)) return a;
+  return db.pessoas[0]?.id ?? null;
+}
+
+/** Quem cuida de verdade: os marcados ou, sem ninguém, o adm. Nunca fica sem ninguém. */
+export function responsaveis(db: Banco, p: Pendencia): { ids: string[]; doAdm: boolean } {
+  const ids = p.resp.filter((r) => db.pessoas.some((x) => x.id === r));
+  if (ids.length) return { ids, doAdm: false };
+  const adm = idAdm(db);
+  return { ids: adm ? [adm] : [], doAdm: true };
+}
 
 /**
  * Automações que dependem só do estado (rodam em todo aparelho; os ids fixos evitam duplicar):
@@ -232,7 +251,7 @@ export function automacoes(db: Banco, hoje: string, agora: string): Op[] {
 
 export function compraDoInventario(it: Item, agora: string): PendCompra {
   return {
-    id: 'inv_' + it.id, tipo: 'compra', itemId: it.id, titulo: it.nome, apto: it.apto, urgencia: it.urgencia ?? 'Útil', resp: [], modo: 'casa',
+    id: 'inv_' + it.id, tipo: 'compra', itemId: it.id, titulo: it.nome, apto: it.apto, urgencia: it.urgencia ?? 'Normal', resp: [], modo: 'casa',
     links: [], obs: '', compras: [], criadoEm: agora, auto: true,
     hist: [hist('Criada sozinha pelo inventário: ' + (it.precisa - it.tem === 1 ? 'falta 1.' : 'faltam ' + (it.precisa - it.tem) + '.'), null, agora)],
   };

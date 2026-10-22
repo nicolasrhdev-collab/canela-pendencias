@@ -2,8 +2,8 @@
 import type { AnchorHTMLAttributes, ButtonHTMLAttributes, CSSProperties, ReactNode } from 'react';
 import { iniciais, tom } from '../../lib/formatos';
 import type { TomItem, TomStatus } from '../../lib/regras';
-import { URG_CLASSE } from '../../lib/regras';
-import type { Apto, Urgencia } from '../../types';
+import { TIPOS } from '../../lib/regras';
+import type { Apto, Tipo, Urgencia } from '../../types';
 
 export function cx(...c: (string | false | null | undefined)[]) { return c.filter(Boolean).join(' '); }
 
@@ -57,10 +57,15 @@ export function Ponto({ tom: t }: { tom: TomStatus | TomItem | 'tem' | 'caminho'
 
 /* 3. Etiquetas de 20 px */
 export function Etiquetas({ children }: { children: ReactNode }) { return <span className="cn-tags">{children}</span>; }
-export function Etiqueta({ tom: t, icone, children }: { tom: 'essencial' | 'util' | 'extra' | 'apto'; icone?: string; children: ReactNode }) {
+export function Etiqueta({ tom: t, icone, children }: { tom: 'apto' | Tipo; icone?: string; children: ReactNode }) {
   return <span className={'cn-tag cn-tag--' + t}>{icone && <Icone nome={icone} />}{children}</span>;
 }
-export function EtiquetaUrgencia({ urgencia }: { urgencia: Urgencia }) { return <Etiqueta tom={URG_CLASSE[urgencia]}>{urgencia}</Etiqueta>; }
+/** Só Essencial tem etiqueta: a bandeira amarela, sem texto (o nome fica para o leitor de tela e no passar do mouse). */
+export function EtiquetaUrgencia({ urgencia }: { urgencia: Urgencia }) {
+  if (urgencia !== 'Essencial') return null;
+  return <span className="cn-tag cn-tag--essencial" role="img" aria-label="Essencial" title="Essencial"><Icone nome="flag" cheio /></span>;
+}
+export function EtiquetaTipo({ tipo }: { tipo: Tipo }) { return <Etiqueta tom={tipo} icone={TIPOS[tipo].icone}>{TIPOS[tipo].rotulo}</Etiqueta>; }
 export function EtiquetaApto({ apto, comIcone = true }: { apto: Apto; comIcone?: boolean }) {
   return <Etiqueta tom="apto" icone={comIcone ? 'apartment' : undefined}>{apto}</Etiqueta>;
 }

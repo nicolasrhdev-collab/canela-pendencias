@@ -1,7 +1,8 @@
 /* Canela · Pendências — modelo de dados (o mesmo no Firestore, no modo de teste e no backup). */
 
 export type Apto = '105' | '306' | 'Ambos';
-export type Urgencia = 'Essencial' | 'Útil' | 'Extra';
+/** Só existe uma prioridade marcada: Essencial (bandeira amarela). O resto é Normal, sem etiqueta. */
+export type Urgencia = 'Essencial' | 'Normal';
 export type Tipo = 'compra' | 'tarefa' | 'servico' | 'pagamento';
 export type Modo = 'presencial' | 'casa';
 export type LocalEntrega = 'condominio' | 'agencia';
@@ -129,7 +130,7 @@ export interface Item {
   /** Quem verificou e quando (AAAA-MM-DD). */
   verificadoPor?: string;
   verificadoEm?: string;
-  /** Urgência da pendência de compra que o item cria quando falta. Sem o campo = Útil. */
+  /** Urgência da pendência de compra que o item cria quando falta. Sem o campo = Normal. */
   urgencia?: Urgencia;
   /** Onde fica no apê (Cozinha, Banheiro…), para filtrar o inventário. */
   grupo?: string;
@@ -158,6 +159,8 @@ export interface Dado {
 
 export interface Config {
   abertura: string | null;
+  /** Pessoa adm: cuida de toda pendência até alguém se oferecer. Sem o campo = a primeira pessoa da lista. */
+  adm?: string | null;
 }
 
 export interface Banco {

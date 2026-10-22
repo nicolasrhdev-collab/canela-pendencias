@@ -55,7 +55,8 @@ button,input,textarea,select{font:inherit;color:inherit}
 .cn-status--atrasado{--cn-dot:var(--atrasado-dot);background:var(--atrasado-container);color:var(--on-atrasado-container)}
 .cn-status--nao-verificado{--cn-dot:var(--outline-strong);background:var(--surface-container);color:var(--on-surface-variant)}
 .cn-dot{display:inline-block;flex:none;width:8px;height:8px;border-radius:50%;background:var(--cn-dot,var(--outline-strong))}
-.cn-dot--pendente,.cn-dot--falta{--cn-dot:var(--pendente-dot)}
+.cn-dot--pendente{--cn-dot:var(--pendente-dot)}
+.cn-dot--falta{--cn-dot:var(--falta-dot)}
 .cn-dot--aguardando,.cn-dot--caminho{--cn-dot:var(--aguardando-dot)}
 .cn-dot--concluido,.cn-dot--tem{--cn-dot:var(--concluido-dot)}
 .cn-dot--atrasado{--cn-dot:var(--atrasado-dot)}
@@ -65,10 +66,13 @@ button,input,textarea,select{font:inherit;color:inherit}
 .cn-tags{display:flex;flex-wrap:wrap;gap:var(--space-1)}
 .cn-tag{display:inline-flex;align-items:center;gap:var(--space-1);height:var(--size-tag);padding:0 var(--space-2);border:1px solid transparent;border-radius:var(--radius-xs);font:500 11px/16px var(--font-sans);letter-spacing:.5px;white-space:nowrap}
 .cn-tag .cn-icon{font-size:16px;margin-left:-2px}
-.cn-tag--essencial{background:var(--inverse-surface);color:var(--inverse-on-surface)}
-.cn-tag--util{background:var(--surface-container-high);color:var(--on-surface)}
-.cn-tag--extra{border-color:var(--outline);color:var(--on-surface-variant)}
-.cn-tag--apto{background:var(--tertiary-container);color:var(--on-tertiary-container)}
+.cn-tag--essencial{justify-content:center;width:var(--size-tag);padding:0;background:var(--pendente-container);color:var(--pendente-dot)}
+.cn-tag--essencial .cn-icon{margin-left:0}
+.cn-tag--apto{background:var(--surface-container-high);color:var(--on-surface)}
+.cn-tag--compra{background:var(--primary-container);color:var(--on-primary-container)}
+.cn-tag--tarefa{background:var(--tertiary-container);color:var(--on-tertiary-container)}
+.cn-tag--servico{background:var(--servico-container);color:var(--on-servico-container)}
+.cn-tag--pagamento{background:var(--pagamento-container);color:var(--on-pagamento-container)}
 
 /* 4. Chips de escolha */
 .cn-chips{display:flex;flex-wrap:wrap;gap:var(--space-2)}
@@ -154,7 +158,7 @@ textarea.cn-field__input{padding:var(--space-3) 0;resize:vertical}
 .cn-progress__seg{flex:1 1 0;min-width:2px;border-radius:var(--radius-full);background:var(--surface-container-high)}
 .cn-progress__seg--tem{background:var(--concluido-dot)}
 .cn-progress__seg--caminho{background:var(--aguardando-dot)}
-.cn-progress__seg--falta{background:var(--pendente-dot)}
+.cn-progress__seg--falta{background:var(--falta-dot)}
 .cn-progress__legend{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-1) var(--space-3);font:400 12px/16px var(--font-sans);letter-spacing:.4px;color:var(--on-surface-variant)}
 .cn-progress__key{display:inline-flex;align-items:center;gap:var(--space-1)}
 .cn-progress__total{margin-left:auto;font-weight:500;color:var(--on-surface);font-variant-numeric:tabular-nums}

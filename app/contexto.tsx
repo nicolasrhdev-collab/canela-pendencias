@@ -3,14 +3,14 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import type { Banco, Op, Pessoa } from '../types';
 import { inverso, type Ctx, type Res } from '../lib/acoes';
 import { agoraIso, hojeIso } from '../lib/datas';
-import { automacoes, type Coluna } from '../lib/regras';
+import { automacoes, idAdm, type Coluna } from '../lib/regras';
 import type { Store } from '../services/banco';
 import { Dialogo, Snackbar } from '../components/ui';
 import { useRota, type Rota, type Tela } from './rotas';
 import type { Tema } from './tema';
 
-export interface Filtros { apto: string; tipo: string; urg: string; resp: string; status: string; casa: boolean }
-export const FILTROS_VAZIOS: Filtros = { apto: 'todos', tipo: 'todos', urg: 'todos', resp: 'todos', status: 'todos', casa: false };
+export interface Filtros { apto: string; tipo: string; urg: string; resp: string; status: string }
+export const FILTROS_VAZIOS: Filtros = { apto: 'todos', tipo: 'todos', urg: 'todos', resp: 'todos', status: 'todos' };
 /** Como o board abre: só o apê 306 (e o que é dos dois). "Limpar filtros" volta para FILTROS_VAZIOS. */
 export const FILTROS_INICIAIS: Filtros = { ...FILTROS_VAZIOS, apto: '306' };
 
@@ -24,6 +24,8 @@ interface Confirmacao { titulo: string; texto: string; acao: string; icone?: str
 export interface ValorApp {
   db: Banco;
   eu: Pessoa;
+  /** Só o adm vê os botões de criar pendência e tarefa. */
+  souAdm: boolean;
   email: string;
   hoje: string;
   celular: boolean;
@@ -137,7 +139,7 @@ export function AppProvider({ store, db, email, celular, tema, sair, children }:
   const fechar = useCallback(() => fecharRota(rota.tela), [fecharRota, rota.tela]);
 
   const valor: ValorApp = {
-    db, eu, email, hoje, celular, modo: store.modo, tema, ctx, fazer, gravarDireto, avisar, confirmar,
+    db, eu, souAdm: eu.id === idAdm(db), email, hoje, celular, modo: store.modo, tema, ctx, fazer, gravarDireto, avisar, confirmar,
     rota, ir, abrir, fechar, abrirNova, fecharNova, filtros, setFiltros, filtrosInv, setFiltrosInv, aba, setAba, sair,
   };
 

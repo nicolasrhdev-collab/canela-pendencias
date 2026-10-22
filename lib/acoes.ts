@@ -7,7 +7,7 @@ import type {
 import { bancoVazio, COLECOES_LISTA } from '../types';
 import { br } from './datas';
 import { novoId, primeiroNome } from './formatos';
-import { compraDoInventario, compraDoItem, contagem, contagemItem, hist, idsEmCanela, porId, situacao, type Coluna } from './regras';
+import { compraDoInventario, compraDoItem, contagem, contagemItem, hist, idAdm, idsEmCanela, porId, responsaveis, situacao, type Coluna } from './regras';
 
 export interface Ctx { db: Banco; eu: Pessoa; hoje: string; agora: string }
 export interface Res { ops: Op[]; msg: string | null }
@@ -146,11 +146,28 @@ export function editarPendencia(c: Ctx, id: string, patch: Partial<Pendencia>): 
   return { ops: anotar(c, ops), msg: 'Pendência atualizada.' };
 }
 
-export function alternarResponsavel(c: Ctx, id: string): Res {
+/** Quem se oferece passa a cuidar (se só o adm cuidava, fica no lugar dele). O adm que se oferece assume sozinho. */
+export function vouCuidar(c: Ctx, id: string): Res {
   const p = pend(c, id);
-  const i = p.resp.indexOf(c.eu.id);
-  if (i >= 0) p.resp.splice(i, 1); else p.resp.push(c.eu.id);
-  return { ops: [opP(p)], msg: i >= 0 ? 'Você saiu dos responsáveis.' : 'Pronto: você é responsável.' };
+  const r = responsaveis(c.db, p), adm = idAdm(c.db);
+  const soAdm = r.ids.length === 1 && r.ids[0] === adm;
+  if (c.eu.id === adm || soAdm) p.resp = [c.eu.id];
+  else p.resp = [...r.ids.filter((x) => x !== c.eu.id), c.eu.id];
+  return { ops: [opP(p)], msg: 'Pronto: você cuida desta pendência.' };
+}
+
+/** Sair dos responsáveis. Se não sobrar ninguém, volta para o adm. */
+export function naoVouCuidar(c: Ctx, id: string): Res {
+  const p = pend(c, id);
+  p.resp = p.resp.filter((x) => x !== c.eu.id);
+  const adm = porId(c.db.pessoas, idAdm(c.db));
+  return { ops: [opP(p)], msg: p.resp.length || !adm ? 'Você saiu dos responsáveis.' : 'Você saiu. Volta para ' + primeiroNome(adm.nome) + ' cuidar.' };
+}
+
+export function tornarAdm(c: Ctx, id: string): Res {
+  const p = porId(c.db.pessoas, id);
+  if (!p) return { ops: [], msg: null };
+  return { ops: [{ col: 'config', id: 'geral', data: { ...c.db.config, adm: id } }], msg: primeiroNome(p.nome) + ' agora é o adm.' };
 }
 
 export function definirResponsaveis(c: Ctx, id: string, resp: string[]): Res {
@@ -512,7 +529,8 @@ export function importarBackup(c: Ctx, texto: string): Res | { erro: string } {
 
 /* ——— Normalização (dados antigos, backups e documentos incompletos) ——— */
 const APTOS: Apto[] = ['105', '306', 'Ambos'];
-const URGS: Urgencia[] = ['Essencial', 'Útil', 'Extra'];
+/** Dados antigos tinham Útil e Extra: tudo que não é Essencial vira Normal. */
+const urgDe = (v: unknown): Urgencia => (v === 'Essencial' ? 'Essencial' : 'Normal');
 const s = (v: unknown, d = '') => (typeof v === 'string' ? v : d);
 const nOu = (v: unknown, d = 0) => (typeof v === 'number' && isFinite(v) ? v : d);
 const dOu = (v: unknown) => (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}/.test(v) ? v.slice(0, 10) : null);
@@ -523,7 +541,7 @@ export function normalizarPendencia(x: Record<string, unknown>): Pendencia | nul
   if (!['compra', 'tarefa', 'servico', 'pagamento'].includes(tipo) || typeof x.id !== 'string') return null;
   const base = {
     id: x.id, titulo: s(x.titulo, 'Sem título'), apto: APTOS.includes(x.apto as Apto) ? (x.apto as Apto) : 'Ambos',
-    urgencia: URGS.includes(x.urgencia as Urgencia) ? (x.urgencia as Urgencia) : 'Útil', resp: arr<string>(x.resp).filter((r) => typeof r === 'string'),
+    urgencia: urgDe(x.urgencia), resp: arr<string>(x.resp).filter((r) => typeof r === 'string'),
     modo: x.modo === 'casa' ? 'casa' : 'presencial', obs: s(x.obs), criadoEm: s(x.criadoEm), auto: !!x.auto,
     links: arr<Record<string, unknown>>(x.links).map((l) => ({ id: s(l.id) || novoId('l'), texto: s(l.texto), url: s(l.url), preco: typeof l.preco === 'number' ? l.preco : null, escolhido: !!l.escolhido })),
     hist: arr<Record<string, unknown>>(x.hist).map((h) => ({ txt: s(h.txt), quem: typeof h.quem === 'string' ? h.quem : null, em: s(h.em) || s(h.data) })),
@@ -553,7 +571,7 @@ export function normalizarBanco(d: Partial<Banco> | Record<string, unknown>): Ba
     ...(i.verificado === false ? { verificado: false } : {}),
     ...(typeof i.verificadoPor === 'string' ? { verificadoPor: i.verificadoPor } : {}),
     ...(dOu(i.verificadoEm) ? { verificadoEm: dOu(i.verificadoEm)! } : {}),
-    ...(URGS.includes(i.urgencia as Urgencia) ? { urgencia: i.urgencia as Urgencia } : {}),
+    ...(i.urgencia === 'Essencial' ? { urgencia: 'Essencial' as const } : {}),
     ...(s(i.grupo).trim() ? { grupo: s(i.grupo).trim() } : {}),
   }));
   b.pessoas = arr<Record<string, unknown>>(r.pessoas).filter((p) => typeof p.id === 'string').map((p) => ({ id: p.id as string, nome: s(p.nome, 'Sem nome'), email: s(p.email).toLowerCase(), local: p.local === 'canela' ? 'canela' : 'fora' }));
@@ -561,6 +579,6 @@ export function normalizarBanco(d: Partial<Banco> | Record<string, unknown>): Ba
   b.documentos = arr<Record<string, unknown>>(r.documentos).filter((x) => typeof x.id === 'string').map((x) => ({ id: x.id as string, nome: s(x.nome), onde: s(x.onde) }));
   b.dados = arr<Record<string, unknown>>(r.dados).filter((x) => typeof x.id === 'string').map((x) => ({ id: x.id as string, rotulo: s(x.rotulo), valor: s(x.valor) }));
   const cfg = (r.config || {}) as Record<string, unknown>;
-  b.config = { abertura: dOu(cfg.abertura) };
+  b.config = { abertura: dOu(cfg.abertura), adm: typeof cfg.adm === 'string' ? cfg.adm : null };
   return b;
 }

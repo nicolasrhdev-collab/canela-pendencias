@@ -5,8 +5,8 @@ import { useApp } from '../../app/contexto';
 import { criarPendencia } from '../../lib/acoes';
 import { deBR } from '../../lib/datas';
 import { primeiroNome, valorDe } from '../../lib/formatos';
-import { situacao } from '../../lib/regras';
-import type { Apto, Modo, Tipo, Urgencia } from '../../types';
+import { idAdm, porId, situacao } from '../../lib/regras';
+import type { Apto, Tipo, Urgencia } from '../../types';
 import { Botao, Campo, CampoData, CampoTelefone, CampoValor, Chip, Escolha, Icone, Janela, PerguntaContador } from '../ui';
 
 const TIPOS_NOVA: [Tipo, string, string, string][] = [
@@ -23,13 +23,38 @@ function Passo({ n, children, id }: { n: number; children: ReactNode; id?: strin
   return <h2 className="title-medium app-pergunta-titulo" id={id}><span className="app-passo" aria-hidden="true">{n}</span>{children}</h2>;
 }
 
+/** Criar pela tela está pausado: por enquanto as pendências são criadas à mão (pela IA). O formulário continua aqui para voltar depois. */
+export const CRIAR_LIGADO = false;
+
+/** Aviso no lugar de um formulário de criar que está pausado. */
+export function Indisponivel({ texto = 'Por enquanto, crie pelo assistente (IA).' }: { texto?: string }) {
+  return (
+    <div className="dt-indisponivel" role="status">
+      <Icone nome="construction" tamanho={24} />
+      <span className="dt-indisponivel__texto">
+        <span className="title-small">Temporariamente indisponível</span>
+        <span className="body-medium texto-apoio">{texto}</span>
+      </span>
+    </div>
+  );
+}
+
 export function NovaPendencia() {
+  const { celular, fecharNova } = useApp();
+  if (CRIAR_LIGADO) return <FormNovaPendencia />;
+  return (
+    <Janela titulo="Nova pendência" aoFechar={fecharNova} celular={celular} rodape={<Botao variante="outlined" onClick={fecharNova}>Fechar</Botao>}>
+      <Indisponivel />
+    </Janela>
+  );
+}
+
+function FormNovaPendencia() {
   const { db, eu, hoje, celular, fazer, fecharNova, setAba } = useApp();
   const [tipo, setTipo] = useState<Tipo | null>(null);
   const [nome, setNome] = useState('');
   const [apto, setApto] = useState<Apto | null>(null);
   const [urg, setUrg] = useState<Urgencia | null>(null);
-  const [modo, setModo] = useState<Modo | null>(null);
   const [qtd, setQtd] = useState(1);
   const [aoChegar, setAoChegar] = useState<'sim' | 'nao' | null>(null);
   const [tarefaChegar, setTarefaChegar] = useState('');
@@ -47,12 +72,13 @@ export function NovaPendencia() {
 
   const abertas = db.pendencias.filter((p) => p.tipo === 'compra' && situacao(db, p, hoje).coluna !== 'concluido');
   const temNome = nome.trim().length >= 2;
-  const espOk = !!modo && (
+  const espOk = (
     tipo === 'compra' ? aoChegar === 'nao' || (aoChegar === 'sim' && tarefaChegar.trim().length >= 2)
       : tipo === 'tarefa' ? depende === 'nao' || (depende === 'sim' && !!depId)
         : tipo === 'servico' ? !!pessoa.trim() && !!quando
           : tipo === 'pagamento' ? !!valor.trim() && !!data.trim() : false);
   const p3 = !!tipo && temNome, p4 = p3 && !!apto, p5 = p4 && !!urg, p6 = p5 && espOk;
+  const admNome = primeiroNome(porId(db.pessoas, idAdm(db))?.nome ?? '');
   const alternar = (id: string) => setResp((r) => (r.includes(id) ? r.filter((x) => x !== id) : [...r, id]));
 
   const criar = () => {
@@ -66,7 +92,7 @@ export function NovaPendencia() {
     if (tipo === 'pagamento' && !vData) e.data = msgData;
     if (Object.keys(e).length) { setErros(e); return; }
     const r = fazer((c) => criarPendencia(c, {
-      tipo: tipo!, titulo: nome, apto: apto!, urgencia: urg!, modo: modo!, resp,
+      tipo: tipo!, titulo: nome, apto: apto!, urgencia: urg!, modo: 'presencial', resp,
       qtd, tarefaAoChegar: tipo === 'compra' && aoChegar === 'sim' ? tarefaChegar : undefined,
       prazo: vPrazo, depende: tipo === 'tarefa' && depende === 'sim' ? depId : null,
       pessoa, telefone, valor: vValor || 0, quando: quando || 'ate', data: vData, vencimento: vData || undefined,
@@ -115,22 +141,18 @@ export function NovaPendencia() {
 
       {p4 && (
         <section style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }} aria-labelledby="nv-4">
-          <Passo n={3} id="nv-4">Qual a urgência?</Passo>
+          <Passo n={3} id="nv-4">É essencial?</Passo>
           <div className="cn-chips" role="group" aria-labelledby="nv-4">
-            {(['Essencial', 'Útil', 'Extra'] as Urgencia[]).map((u) => <Chip key={u} selecionado={urg === u} onClick={() => setUrg(u)}>{u}</Chip>)}
+            {([['Essencial', 'Sim'], ['Normal', 'Não']] as [Urgencia, string][]).map(([u, rotulo]) => <Chip key={u} selecionado={urg === u} onClick={() => setUrg(u)}>{rotulo}</Chip>)}
           </div>
-          <p className="body-small texto-apoio">Essencial: precisa estar pronto antes de abrir. Útil: ajuda bastante. Extra: se der tempo.</p>
+          <p className="body-small texto-apoio">Essencial: precisa estar pronto antes de abrir os apês. Ganha a bandeira amarela.</p>
         </section>
       )}
 
       {p5 && (
         <section style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }} aria-labelledby="nv-5">
           <Passo n={4} id="nv-5">Detalhes</Passo>
-          <Escolha rotulo="Onde dá para fazer?" valor={modo} aoMudar={setModo}
-            ajuda={tipo === 'compra' ? 'De casa: dá para comprar pela internet, de longe.' : undefined}
-            opcoes={[{ valor: 'casa', rotulo: 'De casa' }, { valor: 'presencial', rotulo: 'Presencial em Canela' }]} />
-
-          {modo && tipo === 'compra' && (
+          {tipo === 'compra' && (
             <>
               <PerguntaContador rotulo="Quantas precisa?" valor={qtd} min={1} max={99} aoMudar={setQtd} ajuda="O item também entra no inventário do apê." />
               <Escolha rotulo="Quer criar uma tarefa para quando chegar?" valor={aoChegar} aoMudar={setAoChegar}
@@ -140,7 +162,7 @@ export function NovaPendencia() {
             </>
           )}
 
-          {modo && tipo === 'tarefa' && (
+          {tipo === 'tarefa' && (
             <>
               <Escolha rotulo="Só dá para fazer depois que uma compra chegar?" valor={depende} aoMudar={(v) => { setDepende(v); setDepId(null); }}
                 opcoes={[{ valor: 'nao', rotulo: 'Não' }, { valor: 'sim', rotulo: 'Sim' }]} />
@@ -163,7 +185,7 @@ export function NovaPendencia() {
             </>
           )}
 
-          {modo && tipo === 'servico' && (
+          {tipo === 'servico' && (
             <>
               <Campo rotulo="Nome da pessoa ou empresa" valor={pessoa} aoMudar={setPessoa} icone="person" exemplo="Ex.: Eletricista Marcos" />
               <CampoTelefone rotulo="Telefone" valor={telefone} aoMudar={setTelefone} />
@@ -173,7 +195,7 @@ export function NovaPendencia() {
             </>
           )}
 
-          {modo && tipo === 'pagamento' && (
+          {tipo === 'pagamento' && (
             <>
               <CampoValor rotulo="Quanto é?" valor={valor} aoMudar={(v) => { setValor(v); limpa('valor'); }} erro={erros.valor} exemplo="Ex.: 900,00" />
               {valor.trim() && <CampoData rotulo="Vencimento" valor={data} aoMudar={(v) => { setData(v); limpa('data'); }} erro={erros.data} exemplo="Ex.: 05/11/2026" />}
@@ -189,7 +211,7 @@ export function NovaPendencia() {
             <Chip selecionado={resp.includes(eu.id)} onClick={() => alternar(eu.id)}>Sou responsável ({primeiroNome(eu.nome)})</Chip>
             {db.pessoas.filter((x) => x.id !== eu.id).map((x) => <Chip key={x.id} selecionado={resp.includes(x.id)} onClick={() => alternar(x.id)}>{primeiroNome(x.nome)}</Chip>)}
           </div>
-          <p className="body-small texto-apoio">Pode deixar sem ninguém e decidir depois.</p>
+          <p className="body-small texto-apoio">{admNome ? 'Sem ninguém marcado, fica com ' + admNome + ' (adm) até alguém se oferecer.' : 'Pode deixar sem ninguém e decidir depois.'}</p>
         </section>
       )}
     </Janela>

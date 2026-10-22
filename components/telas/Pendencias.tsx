@@ -2,23 +2,23 @@
 import { useState } from 'react';
 import { FILTROS_VAZIOS, useApp, type Filtros } from '../../app/contexto';
 import { primeiroNome } from '../../lib/formatos';
-import { COLUNAS, ordem, situacao } from '../../lib/regras';
+import { COLUNAS, ordem, responsaveis, situacao } from '../../lib/regras';
 import { CartaoPendencia } from '../CartaoPendencia';
 import { Abas, Board, Botao, Coluna, Seletor, Vazio } from '../ui';
 
 export function Pendencias() {
-  const { db, hoje, celular, filtros: F, setFiltros, aba, setAba, abrir, abrirNova, rota } = useApp();
+  const { db, souAdm, hoje, celular, filtros: F, setFiltros, aba, setAba, abrir, abrirNova, rota } = useApp();
   const [filtrosAbertos, setFiltrosAbertos] = useState(false);
   const pessoas = db.pessoas;
 
-  const grupos: { id: Exclude<keyof Filtros, 'casa'>; pergunta: string; ops: [string, string][] }[] = [
+  const grupos: { id: keyof Filtros; pergunta: string; ops: [string, string][] }[] = [
     { id: 'apto', pergunta: 'Apartamento', ops: [['Todos', 'todos'], ['105', '105'], ['306', '306'], ['Ambos', 'Ambos']] },
     { id: 'tipo', pergunta: 'Tipo', ops: [['Todos', 'todos'], ['Compra', 'compra'], ['Tarefa', 'tarefa'], ['Serviço', 'servico'], ['Pagamento', 'pagamento']] },
-    { id: 'urg', pergunta: 'Urgência', ops: [['Todas', 'todos'], ['Essencial', 'Essencial'], ['Útil', 'Útil'], ['Extra', 'Extra']] },
-    { id: 'resp', pergunta: 'Responsável', ops: [['Todos', 'todos'] as [string, string], ...pessoas.map((p) => [primeiroNome(p.nome), p.id] as [string, string]), ['Ninguém', 'ninguem']] },
+    { id: 'urg', pergunta: 'Essencial', ops: [['Todas', 'todos'], ['Só essenciais', 'Essencial']] },
+    { id: 'resp', pergunta: 'Responsável', ops: [['Todos', 'todos'] as [string, string], ...pessoas.map((p) => [primeiroNome(p.nome), p.id] as [string, string])] },
     { id: 'status', pergunta: 'Situação', ops: [['Todas', 'todos'], ['Pendente', 'pendente'], ['Aguardando', 'aguardando'], ['Concluído', 'concluido'], ['Atrasado', 'atrasado']] },
   ];
-  const ativos = grupos.filter((g) => F[g.id] !== 'todos').length + (F.casa ? 1 : 0);
+  const ativos = grupos.filter((g) => F[g.id] !== 'todos').length;
 
   const cards = db.pendencias
     .map((p) => ({ p, sit: situacao(db, p, hoje) }))
@@ -26,11 +26,9 @@ export function Pendencias() {
       if (F.apto !== 'todos' && !(p.apto === F.apto || (F.apto !== 'Ambos' && p.apto === 'Ambos'))) return false;
       if (F.tipo !== 'todos' && p.tipo !== F.tipo) return false;
       if (F.urg !== 'todos' && p.urgencia !== F.urg) return false;
-      if (F.resp === 'ninguem' && p.resp.length) return false;
-      if (F.resp !== 'todos' && F.resp !== 'ninguem' && !p.resp.includes(F.resp)) return false;
+      if (F.resp !== 'todos' && !responsaveis(db, p).ids.includes(F.resp)) return false;
       if (F.status === 'atrasado' && !sit.atrasado) return false;
       if (F.status !== 'todos' && F.status !== 'atrasado' && sit.coluna !== F.status) return false;
-      if (F.casa && p.modo !== 'casa') return false;
       return true;
     })
     .sort((a, b) => ordem(a.p, a.sit) - ordem(b.p, b.sit) || a.p.titulo.localeCompare(b.p.titulo, 'pt-BR'));
@@ -42,7 +40,7 @@ export function Pendencias() {
   if (!db.pendencias.length) {
     return (
       <Vazio titulo="Nenhuma pendência ainda" texto="Crie a primeira: uma compra, uma tarefa, um serviço ou um pagamento. Ela aparece aqui para todo mundo.">
-        {!celular && <Botao icone="add" onClick={abrirNova}>Criar pendência</Botao>}
+        {!celular && souAdm && <Botao icone="add" onClick={abrirNova}>Criar pendência</Botao>}
       </Vazio>
     );
   }
@@ -66,8 +64,6 @@ export function Pendencias() {
             <Seletor key={g.id} rotulo={g.pergunta} valor={F[g.id]} destacado={F[g.id] !== 'todos'}
               opcoes={g.ops.map(([rotulo, valor]) => ({ rotulo, valor }))} aoMudar={(v) => setFiltros({ ...F, [g.id]: v })} />
           ))}
-          <Seletor rotulo="Quem está longe" valor={F.casa ? 'casa' : 'todos'} destacado={F.casa}
-            opcoes={[{ valor: 'todos', rotulo: 'Todas' }, { valor: 'casa', rotulo: 'Só de casa' }]} aoMudar={(v) => setFiltros({ ...F, casa: v === 'casa' })} />
         </section>
       )}
 
@@ -80,7 +76,7 @@ export function Pendencias() {
         {visiveis.map((k) => (
           <Coluna key={k.id} id={'lista-' + k.id} titulo={k.titulo} tom={k.id} qtd={k.cards.length} cabeca={!celular}
             estilo={celular ? { flex: '1 1 auto', width: 'auto', minWidth: 0 } : { flex: '1 1 0', width: 'auto', minWidth: 260 }}
-            rodape={k.id === 'pendente' && !celular ? <Botao variante="text" icone="add" onClick={abrirNova} style={{ justifyContent: 'flex-start', color: 'var(--on-primary-container)' }}>Criar pendência</Botao> : undefined}>
+            rodape={k.id === 'pendente' && !celular && souAdm ?<Botao variante="text" icone="add" onClick={abrirNova} style={{ justifyContent: 'flex-start', color: 'var(--on-primary-container)' }}>Criar pendência</Botao> : undefined}>
             {k.cards.map(({ p, sit }) => <CartaoPendencia key={p.id} db={db} p={p} sit={sit} hoje={hoje} aoAbrir={() => abrir(p.id)} selecionado={rota.p === p.id} />)}
             {k.cards.length === 0 && <p className="body-medium texto-apoio" style={{ padding: 'var(--space-4) var(--space-2)', textAlign: 'center' }}>{ativos ? 'Nada aqui com estes filtros.' : 'Nada aqui por enquanto.'}</p>}
           </Coluna>

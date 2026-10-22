@@ -8,7 +8,7 @@ import { localNome, meta, situacao, TIPOS } from '../../lib/regras';
 import { Acoes, Aviso, Botao, CampoData, Cartao, Etiqueta, Icone, Linha, Status, Vazio } from '../ui';
 
 export function Inicio() {
-  const { db, eu, hoje, abrir, abrirNova, ir, fazer, setFiltros } = useApp();
+  const { db, eu, souAdm, hoje, abrir, abrirNova, ir, fazer, setFiltros } = useApp();
   const [editando, setEditando] = useState(false);
   const [texto, setTexto] = useState('');
   const [erro, setErro] = useState('');
@@ -56,7 +56,7 @@ export function Inicio() {
       {db.pendencias.length === 0 && (
         <Cartao>
           <Vazio titulo="Nada para organizar ainda" texto="Comece criando a primeira pendência: uma compra, uma tarefa, um serviço ou um pagamento.">
-            <Botao icone="add" onClick={abrirNova}>Criar pendência</Botao>
+            {souAdm && <Botao icone="add" onClick={abrirNova}>Criar pendência</Botao>}
           </Vazio>
         </Cartao>
       )}

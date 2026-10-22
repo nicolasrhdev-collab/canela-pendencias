@@ -36,7 +36,7 @@ function TelaAtual({ tela }: { tela: Tela }) {
 }
 
 export function Shell() {
-  const { db, eu, hoje, celular, rota, ir, fechar, abrirNova, tema } = useApp();
+  const { db, eu, souAdm, hoje, celular, rota, ir, fechar, abrirNova, tema } = useApp();
   const rolagem = useRef<HTMLDivElement>(null);
   const tela = rota.tela;
   /* No inventário, `p` pode ser um item junto ("todos:" + id), um item (detalhe do item) ou a pendência de compra aberta a partir dele. */
@@ -66,13 +66,13 @@ export function Shell() {
           <Botao variante="text" icone={botaoTema.icone} aria-label={botaoTema.rotulo} onClick={tema.alternar} style={{ padding: '0 var(--space-3)' }}>{botaoTema.curto}</Botao>
           {tela !== 'config' && <BotaoIcone icone="settings" rotulo="Configurações" onClick={() => ir('config')} />}
         </BarraTopo>
-        {tela === 'pendencias' && !rota.p && db.pendencias.length > 0 && (
+        {souAdm && tela === 'pendencias' && !rota.p && db.pendencias.length > 0 && (
           <div className="app-acao-fixa"><Botao icone="add" larguraTotal onClick={abrirNova}>Criar pendência</Botao></div>
         )}
         <div className="app-rolagem" ref={rolagem}>
           <div className="app-conteudo">
             {detalhe ? <div className="app-detalhe-celular">{detalhe}</div> : <TelaAtual tela={tela} />}
-            {tela === 'pendencias' && !rota.p && !db.pendencias.length && (
+            {souAdm && tela === 'pendencias' && !rota.p && !db.pendencias.length && (
               <div style={{ display: 'flex', justifyContent: 'center' }}><Botao icone="add" larguraTotal onClick={abrirNova} style={{ maxWidth: 360 }}>Criar pendência</Botao></div>
             )}
           </div>
@@ -93,7 +93,7 @@ export function Shell() {
             <span className="body-small texto-apoio">Apês 105 e 306</span>
           </div>
         </div>
-        <Botao icone="add" className="app-lateral__criar" onClick={abrirNova}>Criar pendência</Botao>
+        {souAdm && <Botao icone="add" className="app-lateral__criar" onClick={abrirNova}>Criar pendência</Botao>}
         {NAV.map((x) => <ItemLateral key={x.id} item={x.id === 'infos' ? { ...x, rotulo: 'Informações' } : x} atual={tela === x.id} aoIr={() => irPara(x.id)} />)}
         <div className="app-lateral__espaco" />
         <Botao variante="outlined" icone={botaoTema.icone} onClick={tema.alternar}>{botaoTema.rotulo}</Botao>

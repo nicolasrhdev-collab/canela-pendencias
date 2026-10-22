@@ -4,10 +4,12 @@ import { dataHora } from '../../lib/datas';
 import { Avatar, cx, Icone, Ponto } from './base';
 import type { TomStatus } from '../../lib/regras';
 
-/* 8. Barra de progresso por unidade: um pedaço por unidade (verde tem, azul a caminho, amarelo falta).
+/* 8. Barra de progresso por unidade: um pedaço por unidade (verde tem, azul a caminho, cinza falta).
    Acima de 24 unidades vira blocos proporcionais. Com `precisa`, o total é o que precisa (ex.: "6 de 4" quando tem a mais).
-   `naoVerificado`: item que ninguém verificou no apê, tudo cinza e "? de 6". */
-export function BarraUnidades({ tem, caminho, falta, precisa, compacto, semLegenda, naoVerificado }: { tem: number; caminho: number; falta: number; precisa?: number; compacto?: boolean; semLegenda?: boolean; naoVerificado?: boolean }) {
+   `naoVerificado`: item que ninguém verificou no apê, tudo cinza-claro e "? de 6".
+   `semTotal`: sem o "3 de 12" na legenda (quando o número já aparece grande acima).
+   `rotulo`: o que o leitor de tela fala no lugar da contagem (tarefa, serviço e pagamento não contam unidades). */
+export function BarraUnidades({ tem, caminho, falta, precisa, compacto, semLegenda, semTotal, naoVerificado, rotulo }: { tem: number; caminho: number; falta: number; precisa?: number; compacto?: boolean; semLegenda?: boolean; semTotal?: boolean; naoVerificado?: boolean; rotulo?: string }) {
   if (naoVerificado) {
     const n = precisa ?? tem + caminho + falta, resumo = '? de ' + n;
     const barra = (
@@ -29,7 +31,7 @@ export function BarraUnidades({ tem, caminho, falta, precisa, compacto, semLegen
   if (!segs.length) segs.push({ cls: 'cn-progress__seg', grow: 1 });
   const resumo = tem + ' de ' + (precisa ?? total);
   const aria = resumo + ': ' + tem + ' já tem, ' + caminho + ' a caminho, ' + falta + (falta === 1 ? ' falta' : ' faltam');
-  const barra = <span className="cn-progress__bar" role="img" aria-label={aria}>{segs.map((s, i) => <span key={i} className={s.cls} style={{ flexGrow: s.grow }} />)}</span>;
+  const barra = <span className="cn-progress__bar" role="img" aria-label={rotulo ?? aria}>{segs.map((s, i) => <span key={i} className={s.cls} style={{ flexGrow: s.grow }} />)}</span>;
   const chaves = (
     <>
       <span className="cn-progress__key"><Ponto tom="tem" />{tem} tem</span>
@@ -50,7 +52,7 @@ export function BarraUnidades({ tem, caminho, falta, precisa, compacto, semLegen
   return (
     <div className="cn-progress">
       {barra}
-      <div className="cn-progress__legend">{chaves}<span className="cn-progress__total">{resumo}</span></div>
+      <div className="cn-progress__legend">{chaves}{!semTotal && <span className="cn-progress__total">{resumo}</span>}</div>
     </div>
   );
 }

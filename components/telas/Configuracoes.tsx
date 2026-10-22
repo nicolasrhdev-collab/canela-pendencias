@@ -2,7 +2,8 @@
 import { useRef, useState } from 'react';
 import { useApp } from '../../app/contexto';
 import type { PrefTema } from '../../app/tema';
-import { adicionarPessoa, editarPessoa, exportarBackup, importarBackup, mudarAbertura, removerPessoa } from '../../lib/acoes';
+import { adicionarPessoa, editarPessoa, exportarBackup, importarBackup, mudarAbertura, removerPessoa, tornarAdm } from '../../lib/acoes';
+import { idAdm } from '../../lib/regras';
 import { br, deBR, hojeIso } from '../../lib/datas';
 import { emailValido, primeiroNome } from '../../lib/formatos';
 import type { OndePessoa, Pessoa } from '../../types';
@@ -11,6 +12,7 @@ import { Acoes, Aviso, Avatar, Botao, Campo, CampoData, Escolha, Icone, Segmenta
 export function Configuracoes() {
   const { db, eu, email, modo, tema, sair, confirmar, fazer } = useApp();
   const [editando, setEditando] = useState<string | 'nova' | null>(null);
+  const adm = idAdm(db);
 
   const remover = async (p: Pessoa) => {
     const n = primeiroNome(p.nome);
@@ -33,10 +35,11 @@ export function Configuracoes() {
               <li key={p.id}>
                 <Avatar nome={p.nome} tamanho={36} decorativo />
                 <span className="app-lista__texto">
-                  <span className="title-small">{p.nome}{p.id === eu.id ? ' (você)' : ''}</span>
+                  <span className="title-small">{p.nome}{p.id === eu.id ? ' (você)' : ''}{p.id === adm ? ' · adm' : ''}</span>
                   <span className="body-small texto-apoio">{p.email || 'Sem e-mail'} · {p.local === 'canela' ? 'Em Canela' : 'Em outra cidade'}</span>
                 </span>
                 <span className="app-linha-botoes">
+                  {p.id !== adm && <Botao variante="text" onClick={() => fazer((c) => tornarAdm(c, p.id))} aria-label={'Tornar ' + p.nome + ' o adm'}>Tornar adm</Botao>}
                   <Botao variante="text" onClick={() => setEditando(p.id)} aria-label={'Editar ' + p.nome}>Editar</Botao>
                   {p.id !== eu.id && <Botao variante="text" onClick={() => remover(p)} aria-label={'Remover ' + p.nome}>Remover</Botao>}
                 </span>
@@ -45,7 +48,7 @@ export function Configuracoes() {
           </ul>
           {editando === 'nova' ? <FormPessoa atual={null} aoFechar={() => setEditando(null)} />
             : <div style={{ paddingTop: 'var(--space-2)' }}><Botao variante="outlined" icone="person_add" onClick={() => setEditando('nova')}>Adicionar pessoa</Botao></div>}
-          <p className="body-small texto-apoio" style={{ paddingTop: 'var(--space-2)' }}>Quem está “Em Canela” recebe sozinho as tarefas de retirada na agência.</p>
+          <p className="body-small texto-apoio" style={{ paddingTop: 'var(--space-2)' }}>Quem está “Em Canela” recebe sozinho as tarefas de retirada na agência. O adm cuida de toda pendência até alguém se oferecer.</p>
         </section>
 
         <SecaoAbertura />

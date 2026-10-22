@@ -1,0 +1,134 @@
+/* Detalhe da pendência (painel do computador e tela do celular), no Material 3.
+   Ritmo: 24 px entre blocos, 32 px entre seções, 12 px dentro de um bloco.
+   --dt-fundo: a cor do fundo onde o detalhe está (no painel é a superfície de sobreposição). */
+.dt{--dt-fundo:var(--surface);position:relative;display:flex;flex-direction:column;box-sizing:border-box;width:100%;color:var(--on-surface);font-family:var(--font-sans)}
+.dt p,.dt h2,.dt h3{margin:0}
+.app-painel > .dt{flex:1 0 auto;--dt-fundo:var(--surface-overlay)}
+
+/* Topo: tipo à esquerda, ⋮ e fechar à direita */
+.dt-top{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:var(--space-1);height:64px;padding:0 var(--space-4) 0 var(--space-6);background:var(--dt-fundo)}
+.dt-top__tipo{flex:1;display:inline-flex;align-items:center;gap:var(--space-2);font:var(--text-label-large);letter-spacing:.1px;color:var(--on-surface-variant)}
+.dt-menu-ancora{position:relative;flex:none}
+.dt-menu{left:auto;right:0;min-width:220px;z-index:5}
+.dt-menu__item{width:100%;border:0;background:transparent;text-align:left}
+.dt-menu__item .cn-icon{color:var(--on-surface-variant)}
+
+.dt-corpo{flex:1;display:flex;flex-direction:column;gap:var(--space-6);padding:var(--space-2) var(--space-6) var(--space-8)}
+
+/* Cabeça: título grande e as etiquetas logo abaixo */
+.dt-cabeca{display:flex;flex-direction:column;gap:var(--space-4)}
+.dt-cabeca__linha{display:flex;align-items:flex-start;gap:var(--space-2)}
+.dt-cabeca__linha > .dt-menu-ancora{margin:calc(var(--space-1) * -1) calc(var(--space-2) * -1) 0 auto}
+.dt-titulo{flex:1;min-width:0;font:var(--text-headline-small);color:var(--on-surface);overflow-wrap:anywhere}
+.dt-chips{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-2)}
+
+/* Resumo: o número que importa e a próxima coisa que vai acontecer */
+.dt-resumo{display:flex;flex-direction:column;gap:var(--space-4);padding:var(--space-5);border:1px solid var(--outline-variant);border-radius:var(--radius-lg);background:var(--surface-container-low)}
+.dt-resumo__topo{display:flex;align-items:center;justify-content:space-between;gap:var(--space-2);min-height:32px;margin:calc(var(--space-1) * -1) calc(var(--space-2) * -1) calc(var(--space-2) * -1) 0}
+.dt-numero{font:var(--text-headline-small);color:var(--on-surface);font-variant-numeric:tabular-nums}
+.dt-resumo > .dt-numero{font:var(--text-headline-medium)}
+.dt-resumo__linha{display:flex;align-items:flex-start;gap:var(--space-3);padding-top:var(--space-4);border-top:1px solid var(--outline-variant)}
+.dt-resumo__linha > .cn-icon{color:var(--on-surface-variant);margin-top:2px}
+.dt-resumo__linha--vencido,.dt-resumo__linha--vencido > .cn-icon{color:var(--error)}
+.dt-resumo__texto{display:flex;flex-direction:column;gap:2px}
+.dt-grade{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-5)}
+.dt-par{display:flex;flex-direction:column;gap:var(--space-2)}
+
+/* Abas do Material 3 (primárias): sublinhado azul na ativa */
+.dt-abas{display:flex;margin:var(--space-2) calc(var(--space-6) * -1) 0;padding:0 var(--space-6);border-bottom:1px solid var(--outline-variant)}
+.dt-aba{position:relative;isolation:isolate;flex:1 1 0;display:inline-flex;align-items:center;justify-content:center;gap:var(--space-2);height:48px;padding:0 var(--space-4);border:0;background:transparent;color:var(--on-surface-variant);font:var(--text-title-small);letter-spacing:.1px;cursor:pointer}
+.dt-aba::before{content:"";position:absolute;inset:0;background:currentColor;opacity:0;transition:opacity .15s;z-index:-1}
+.dt-aba:hover::before{opacity:var(--opacity-hover)}
+.dt-aba[aria-selected="true"]{color:var(--primary)}
+.dt-aba[aria-selected="true"]::after{content:"";position:absolute;left:var(--space-4);right:var(--space-4);bottom:-1px;height:3px;border-radius:3px 3px 0 0;background:var(--primary)}
+.dt-aba:focus-visible{outline:2px solid var(--focus-ring);outline-offset:-2px}
+.dt-aba__qtd{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;box-sizing:border-box;border-radius:var(--radius-full);background:var(--surface-container-high);color:var(--on-surface);font:var(--text-label-small)}
+
+.dt-painel{display:flex;flex-direction:column;gap:var(--space-8);padding-top:var(--space-2)}
+
+/* Seção: título com a ação ao lado, conteúdo embaixo */
+.dt-sec{display:flex;flex-direction:column;gap:var(--space-3)}
+.dt-sec--form{gap:var(--space-5)}
+.dt-sec__topo{display:flex;align-items:center;justify-content:space-between;gap:var(--space-3);min-height:40px}
+.dt-sec__titulo{font:var(--text-title-medium);letter-spacing:.15px}
+.dt-sec__topo > .dt-menu-ancora{margin-right:calc(var(--space-2) * -1)}
+.dt-sec__caixa{display:flex;flex-direction:column;gap:var(--space-2)}
+.dt-vazio{padding:var(--space-1) 0}
+.cn-btn.dt-btn-pequeno{height:36px;padding:0 var(--space-4)}
+.cn-btn--text.dt-btn-pequeno{padding:0 var(--space-3)}
+.cn-btn--outlined.dt-btn-pequeno{padding:0 var(--space-4) 0 var(--space-3)}
+.dt-btn-pequeno .cn-icon{margin-left:0}
+
+/* Lista do Material 3: ícone ou avatar, texto, ação à direita */
+.dt-lista{margin:0;padding:0;list-style:none;border:1px solid var(--outline-variant);border-radius:var(--radius-md);overflow:hidden}
+.dt-lista > li + li{border-top:1px solid var(--outline-variant)}
+.dt-item{display:flex;align-items:center;gap:var(--space-4);min-height:64px;padding:var(--space-3) var(--space-3) var(--space-3) var(--space-4);box-sizing:border-box}
+.dt-item--botao{position:relative;isolation:isolate;width:100%;border:0;background:transparent;color:var(--on-surface);font:inherit;text-align:left;cursor:pointer}
+.dt-item--botao::before{content:"";position:absolute;inset:0;background:currentColor;opacity:0;z-index:-1;transition:opacity .15s}
+.dt-item--botao:hover::before{opacity:var(--opacity-hover)}
+.dt-item--botao:focus-visible{outline:2px solid var(--focus-ring);outline-offset:-2px}
+.dt-item__icone{color:var(--on-surface-variant)}
+.dt-item__texto{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+
+/* Compra registrada: card contornado, opções no ⋮ */
+.dt-compra{display:flex;flex-direction:column;gap:var(--space-3);padding:var(--space-3) var(--space-3) var(--space-4) var(--space-5);border:1px solid var(--outline);border-radius:var(--radius-md)}
+.dt-compra__topo{display:flex;align-items:center;justify-content:space-between;gap:var(--space-2)}
+.dt-fatos{display:flex;flex-direction:column;gap:var(--space-3);margin:0;padding:0;list-style:none;font:var(--text-body-medium);color:var(--on-surface)}
+.dt-fatos li{display:flex;align-items:center;gap:var(--space-3)}
+.dt-fatos .cn-icon{color:var(--on-surface-variant)}
+.dt-fatos a{color:var(--primary)}
+.dt-fatos__vencido,.dt-fatos .dt-fatos__vencido .cn-icon{color:var(--error);font-weight:500}
+
+/* Links de sugestão */
+.dt-link{display:flex;align-items:center;gap:var(--space-3);min-height:64px;padding:var(--space-3) var(--space-2) var(--space-3) var(--space-4);box-sizing:border-box}
+.dt-link__texto{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.dt-link__texto a{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:var(--text-body-large);color:var(--primary);text-decoration:none}
+.dt-link__texto a:hover{text-decoration:underline}
+
+/* Depois que chegar: lista no estilo do Google Tarefas */
+.gt{display:flex;flex-direction:column;margin:0;padding:0;list-style:none}
+.gt-add{position:relative;isolation:isolate;display:flex;align-items:center;gap:var(--space-4);width:100%;min-height:48px;padding:0 var(--space-2);border:0;border-radius:var(--radius-full);background:transparent;color:var(--primary);font:var(--text-title-small);letter-spacing:.1px;text-align:left;cursor:pointer;box-sizing:border-box}
+.gt-add::before{content:"";position:absolute;inset:0;border-radius:inherit;background:currentColor;opacity:0;z-index:-1;transition:opacity .15s}
+.gt-add:hover::before{opacity:var(--opacity-hover)}
+.gt-add .cn-icon{font-size:24px}
+.gt-item{display:flex;align-items:flex-start;gap:var(--space-2);padding:var(--space-3) 0}
+.gt-item + .gt-item{border-top:1px solid var(--outline-variant)}
+.gt-check{position:relative;isolation:isolate;flex:none;display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;margin-top:-8px;border:0;border-radius:var(--radius-full);background:transparent;color:var(--on-surface-variant);cursor:pointer}
+.gt-check::before{content:"";position:absolute;inset:0;border-radius:inherit;background:currentColor;opacity:0;z-index:-1;transition:opacity .15s}
+.gt-check:hover::before{opacity:var(--opacity-hover)}
+.gt-check .cn-icon{font-size:24px}
+.gt-check:disabled{color:var(--on-disabled);cursor:default}
+.gt-check:disabled::before{display:none}
+.gt-check--feito{color:var(--primary)}
+.gt-check--feito .cn-icon{font-variation-settings:"FILL" 1,"wght" 400,"GRAD" 0,"opsz" 24}
+.gt-corpo{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:var(--space-1);padding-top:2px}
+.gt-titulo{font:var(--text-body-large);color:var(--on-surface)}
+.gt-abrir{padding:0;border:0;background:transparent;text-align:left;cursor:pointer}
+.gt-abrir:hover{text-decoration:underline}
+.gt-det{font:var(--text-body-medium);color:var(--on-surface-variant)}
+.gt-chips{display:flex;flex-wrap:wrap;gap:var(--space-2);margin-top:var(--space-2)}
+.gt-chip{display:inline-flex;align-items:center;gap:var(--space-1);height:28px;padding:0 var(--space-3) 0 var(--space-2);border:1px solid var(--outline-strong);border-radius:var(--radius-full);color:var(--on-surface);font:var(--text-label-medium);letter-spacing:.3px;white-space:nowrap}
+.gt-chip .cn-icon{font-size:16px;color:var(--on-surface-variant)}
+.gt-chip--espera{border-color:transparent;background:var(--surface-container-high)}
+.gt-chip--vencido{border-color:transparent;background:var(--atrasado-container);color:var(--on-atrasado-container)}
+.gt-chip--vencido .cn-icon{color:inherit}
+.gt-feitas{display:flex;align-items:center;gap:var(--space-2);width:100%;height:40px;margin-top:var(--space-2);padding:0 var(--space-2);border:0;border-radius:var(--radius-full);background:transparent;color:var(--on-surface);font:var(--text-title-small);text-align:left;cursor:pointer}
+.gt-item--feito .gt-titulo{text-decoration:line-through;color:var(--on-surface-variant)}
+
+/* WhatsApp: ícone desenhado, no verde escuro de "concluído" para ter contraste */
+.dt-zap{color:var(--on-concluido-container)}
+.dt-zap svg{display:block;width:22px;height:22px}
+
+/* Aviso de "Temporariamente indisponível" no lugar de um formulário de criar */
+.dt-indisponivel{display:flex;align-items:flex-start;gap:var(--space-4);padding:var(--space-5);border:1px dashed var(--outline-strong);border-radius:var(--radius-lg);background:var(--surface-container-low)}
+.dt-indisponivel > .cn-icon{color:var(--on-surface-variant)}
+.dt-indisponivel__texto{display:flex;flex-direction:column;gap:var(--space-1)}
+
+/* Rodapé preso embaixo com a ação principal */
+.dt-rodape{position:sticky;bottom:0;z-index:2;padding:var(--space-4) var(--space-6);border-top:1px solid var(--outline-variant);background:var(--dt-fundo)}
+
+/* Celular: a tela já tem margem lateral e a barra de cima mostra o tipo */
+.app-detalhe-celular > .dt{max-width:600px}
+.app-detalhe-celular .dt-corpo{padding:0 0 var(--space-6)}
+.app-detalhe-celular .dt-abas{margin-left:calc(var(--space-4) * -1);margin-right:calc(var(--space-4) * -1);padding:0 var(--space-4)}
+.app-detalhe-celular .dt-rodape{margin:0 calc(var(--space-4) * -1);padding:var(--space-3) var(--space-4)}

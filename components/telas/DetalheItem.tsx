@@ -262,7 +262,7 @@ export function FormVerificar({ it, aoFechar, caixa }: { it: Item; aoFechar: () 
   const falta = it.precisa - tem;
   const salvar = () => { fazer((x) => verificarItem(x, it.id, tem)); aoFechar(); };
   const resultado = falta > 0
-    ? (falta === 1 ? 'Falta 1' : 'Faltam ' + falta) + ': vira pendência de compra' + (it.urgencia ? ' (' + it.urgencia + ')' : '') + '.'
+    ? (falta === 1 ? 'Falta 1' : 'Faltam ' + falta) + ': vira pendência de compra' + (it.urgencia === 'Essencial' ? ' (essencial)' : '') + '.'
     : 'Fica completo.';
 
   return (

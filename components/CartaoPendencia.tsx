@@ -1,27 +1,36 @@
-/* Card compacto estilo Trello: etiquetas, título, barra de progresso, onde e quando chega, responsáveis. */
+/* Card compacto estilo Trello: etiquetas em cima (tipo, apê, bandeira de essencial), título, onde e quando, barra de progresso sempre e, embaixo dela, quem cuida. */
 import type { Banco, Pendencia } from '../types';
-import { contagem, meta, porId, TIPOS, type Situacao } from '../lib/regras';
-import { Avatares, BarraUnidades, CardBoard, EtiquetaApto, Etiquetas, EtiquetaUrgencia, Meta, Status } from './ui';
+import { primeiroNome } from '../lib/formatos';
+import { meta, porId, progresso, responsaveis, type Situacao } from '../lib/regras';
+import { Avatar, BarraUnidades, CardBoard, EtiquetaApto, Etiquetas, EtiquetaTipo, EtiquetaUrgencia, Meta, Status } from './ui';
+
+/** "Ana", "Ana e Rui" ou "Ana, Rui e mais 2". */
+function quemCuida(nomes: string[]) {
+  const n = nomes.map(primeiroNome);
+  return n.length <= 2 ? n.join(' e ') : n.slice(0, 2).join(', ') + ' e mais ' + (n.length - 2);
+}
 
 export function CartaoPendencia({ db, p, sit, hoje, aoAbrir, selecionado }: { db: Banco; p: Pendencia; sit: Situacao; hoje: string; aoAbrir: () => void; selecionado?: boolean }) {
-  const T = TIPOS[p.tipo], m = meta(p, sit, hoje);
-  const nomes = p.resp.map((id) => porId(db.pessoas, id)?.nome).filter((n): n is string => !!n);
-  const c = p.tipo === 'compra' ? contagem(db, p) : null;
+  const m = meta(p, sit, hoje), c = progresso(db, p, sit);
+  const nomes = responsaveis(db, p).ids.map((id) => porId(db.pessoas, id)?.nome).filter((n): n is string => !!n);
   return (
     <CardBoard onClick={aoAbrir} selecionado={selecionado}>
       <Etiquetas>
-        <EtiquetaUrgencia urgencia={p.urgencia} />
+        <EtiquetaTipo tipo={p.tipo} />
         <EtiquetaApto apto={p.apto} />
+        <EtiquetaUrgencia urgencia={p.urgencia} />
         {sit.atrasado && <Status tom="atrasado" pequeno>Atrasado</Status>}
       </Etiquetas>
-      <Meta icone={T.icone}>{T.rotulo}{p.modo === 'casa' ? ' · dá para fazer de casa' : ''}</Meta>
       <span className="cn-board-card__title">{p.titulo}</span>
-      {c && <BarraUnidades compacto tem={c.tem} caminho={c.cam} falta={c.falta} precisa={c.precisa} />}
+      <Meta icone={m.icone} vencido={m.vencido}>{m.texto}</Meta>
       {sit.bloqueio && <Meta icone="lock" style={{ color: 'var(--on-surface)' }}>{sit.bloqueio.texto}</Meta>}
-      <span className="cn-board-card__foot">
-        <Meta icone={m.icone} vencido={m.vencido}>{m.texto}</Meta>
-        {nomes.length ? <Avatares nomes={nomes} /> : <span className="body-small texto-apoio">Sem responsável</span>}
-      </span>
+      <BarraUnidades compacto semLegenda tem={c.tem} caminho={c.cam} falta={c.falta} precisa={c.precisa} rotulo={p.tipo === 'compra' ? undefined : sit.rotulo} />
+      {nomes.length > 0 && (
+        <span className="app-card-resp">
+          <span className="cn-avatars">{nomes.slice(0, 3).map((n, i) => <Avatar key={n + i} nome={n} tamanho={24} decorativo />)}</span>
+          <span className="app-card-resp__nomes">{quemCuida(nomes)}</span>
+        </span>
+      )}
     </CardBoard>
   );
 }

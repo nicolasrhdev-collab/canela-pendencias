@@ -87,6 +87,9 @@ a { color: var(--primary); }
 .app-pergunta-titulo { display: flex; align-items: center; gap: var(--space-2); }
 
 .cn-board-card { width: 100%; text-align: left; font: inherit; }
+/* Quem cuida, embaixo da barra do card: avatares e primeiros nomes */
+.app-card-resp { display: flex; align-items: center; gap: var(--space-2); min-height: 24px; font: 400 12px/16px var(--font-sans); letter-spacing: .4px; color: var(--on-surface-variant); }
+.app-card-resp__nomes { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cn-sheet { max-height: 90%; overflow-y: auto; }
 
 /* ——— Estrutura das telas ——— */

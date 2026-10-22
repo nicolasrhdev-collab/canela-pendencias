@@ -1,0 +1,176 @@
+/* Canela · Pendências — peças do app que o protótipo do sistema de design já trazia (app-*)
+   e a estrutura das telas. Só usa os tokens de tema.css. */
+
+html, body, #root { height: 100%; }
+body { overflow: hidden; }
+a { color: var(--primary); }
+
+/* Linha tocável de lista (início, calendário, inventário) — mesma camada de estado dos componentes */
+.app-row { position: relative; isolation: isolate; display: flex; align-items: center; gap: var(--space-3); width: 100%; min-height: 56px; padding: var(--space-3) var(--space-4); border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--on-surface); text-align: left; cursor: pointer; font: inherit; -webkit-tap-highlight-color: transparent; }
+.app-row::before { content: ""; position: absolute; inset: 0; border-radius: inherit; background: currentColor; opacity: 0; transition: opacity .15s; pointer-events: none; z-index: -1; }
+.app-row:hover::before { opacity: var(--opacity-hover); }
+.app-row:active::before { opacity: var(--opacity-pressed); }
+.app-row:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.app-row + .app-row { box-shadow: 0 -1px 0 var(--outline-variant); }
+.app-row__icone { color: var(--on-surface-variant); }
+.app-row__texto { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--space-1); }
+
+/* Menu lateral do computador */
+.app-side-item { position: relative; isolation: isolate; display: flex; align-items: center; gap: var(--space-3); width: 100%; height: 40px; padding: 0 var(--space-4); border: 0; border-radius: var(--radius-full); background: transparent; color: var(--on-surface-variant); font: 500 14px/20px var(--font-sans); letter-spacing: .1px; text-align: left; cursor: pointer; }
+.app-side-item::before { content: ""; position: absolute; inset: 0; border-radius: inherit; background: currentColor; opacity: 0; transition: opacity .15s; pointer-events: none; z-index: -1; }
+.app-side-item:hover::before { opacity: var(--opacity-hover); }
+.app-side-item:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.app-side-item .cn-icon { font-size: 20px; }
+.app-side-item[aria-current="page"] { background: var(--secondary-container); color: var(--on-secondary-container); font-weight: 700; }
+.app-side-item[aria-current="page"] .cn-icon { font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 20; }
+
+/* Botões grandes de escolha (O que você quer adicionar?) */
+.app-opcao { position: relative; isolation: isolate; display: flex; align-items: center; gap: var(--space-3); width: 100%; min-height: 72px; padding: var(--space-3) var(--space-4); border: 1px solid var(--outline-strong); border-radius: var(--radius-md); background: var(--surface); color: var(--on-surface); text-align: left; cursor: pointer; font: inherit; }
+.app-opcao::before { content: ""; position: absolute; inset: 0; border-radius: inherit; background: currentColor; opacity: 0; transition: opacity .15s; pointer-events: none; z-index: -1; }
+.app-opcao:hover::before { opacity: var(--opacity-hover); }
+.app-opcao:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.app-opcao .cn-icon { font-size: 24px; color: var(--primary); }
+.app-opcao[aria-pressed="true"] { border-color: transparent; background: var(--secondary-container); color: var(--on-secondary-container); }
+.app-opcao[aria-pressed="true"] .cn-icon { color: inherit; font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 24; }
+.app-opcoes { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); gap: var(--space-2); }
+
+/* Filtros do board: uma linha de menus suspensos no computador, duas colunas no celular */
+.app-filtros { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-3); }
+.app--celular .app-filtros { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+/* Inventário: dois ou três menus, sem esticar pela tela toda no computador */
+.app-filtros--curto { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 440px; }
+.app-filtros--curto.app-filtros--tres { grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: 660px; }
+.app--celular .app-filtros--curto.app-filtros--tres { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+/* Cards do inventário */
+.app-inv-grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr)); gap: var(--space-3); }
+.app-inv-card__topo { display: flex; align-items: flex-start; gap: var(--space-2); }
+.app-inv-card__topo .cn-board-card__title { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+/* Item junto (opção Todos): uma linha por apê no card e um bloco por apê no detalhe */
+.app-inv-linha { display: flex; align-items: center; gap: var(--space-2); }
+.app-inv-linha > .cn-progress { flex: 1; min-width: 0; }
+.app-inv-linha .cn-progress__total { min-width: 40px; text-align: right; }
+.app-bloco--ape { gap: var(--space-3); padding: var(--space-4); }
+.app-bloco__topo { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-2); }
+.app-row--caixa { min-height: 48px; padding: var(--space-2) var(--space-3); background: var(--surface-container-low); }
+.app-painel .cn-detail.app-detalhe--sem-rodape, .app-detalhe-celular .cn-detail.app-detalhe--sem-rodape { padding-bottom: var(--space-6); }
+
+/* Detalhe do item: um card por registro (a caminho, disponível…) e a linha do próprio item em "Em cada apê" */
+.app-registros { display: flex; flex-direction: column; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+.app-registro__topo { display: flex; align-items: center; gap: var(--space-2); }
+.app-registro__topo > :last-child { margin-left: auto; }
+.app-row--atual { cursor: default; }
+.app-row--atual::before { display: none; }
+
+/* Dia do calendário */
+.app-dia { position: relative; isolation: isolate; display: flex; flex-direction: column; align-items: stretch; gap: 2px; min-height: 88px; padding: var(--space-2); border: 1px solid var(--outline-variant); border-radius: var(--radius-sm); background: var(--surface); color: var(--on-surface); text-align: left; cursor: pointer; font: inherit; overflow: hidden; }
+.app-dia::before { content: ""; position: absolute; inset: 0; border-radius: inherit; background: currentColor; opacity: 0; transition: opacity .15s; pointer-events: none; z-index: -1; }
+.app-dia:hover::before { opacity: var(--opacity-hover); }
+.app-dia:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.app-dia[aria-pressed="true"] { border-color: var(--primary); box-shadow: inset 0 0 0 1px var(--primary); }
+.app-dia--hoje .app-dia__num { background: var(--primary); color: var(--on-primary); }
+.app-dia__num { align-self: flex-start; min-width: 28px; height: 28px; padding: 0 6px; border-radius: var(--radius-full); font: 500 14px/28px var(--font-sans); text-align: center; font-variant-numeric: tabular-nums; }
+.app-dia__ev { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 500 11px/16px var(--font-sans); letter-spacing: .3px; color: var(--on-surface-variant); }
+.app-dias { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--space-1); }
+@media (max-width: 600px) { .app-dia { min-height: 52px; padding: 4px; align-items: center; } .app-dia__num { align-self: center; } .app-dia__ev { text-align: center; } }
+
+/* Barra de porcentagem (essenciais prontas) */
+.app-pct { height: 8px; border-radius: var(--radius-full); background: var(--surface-container-high); overflow: hidden; }
+.app-pct__fill { height: 100%; border-radius: var(--radius-full); background: var(--concluido-dot); }
+
+/* Arquivo escondido atrás de um botão (importar backup) */
+.app-arquivo { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.app-arquivo:focus-visible + .cn-btn { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+
+/* Número do passo na Nova pendência */
+.app-passo { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 24px; height: 24px; border-radius: var(--radius-full); background: var(--primary); color: var(--on-primary); font: 500 12px/24px var(--font-sans); }
+.app-pergunta-titulo { display: flex; align-items: center; gap: var(--space-2); }
+
+.cn-board-card { width: 100%; text-align: left; font: inherit; }
+.cn-sheet { max-height: 90%; overflow-y: auto; }
+
+/* ——— Estrutura das telas ——— */
+.app { display: flex; height: 100vh; height: 100dvh; background: var(--surface); color: var(--on-surface); }
+.app--celular { flex-direction: column; }
+.app-principal { flex: 1 1 auto; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+.app-rolagem { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.app-conteudo { width: 100%; max-width: 1240px; padding: var(--space-5) var(--space-6) 48px; }
+.app--celular .app-conteudo { padding: var(--space-4) var(--space-4) var(--space-8); }
+.app--celular .cn-topbar { flex: none; }
+.app--celular .cn-navbar { flex: none; height: calc(80px + env(safe-area-inset-bottom)); padding-bottom: env(safe-area-inset-bottom); }
+.app-nav-botao { border: 0; background: transparent; }
+.app-acao-fixa { flex: none; padding: var(--space-3) var(--space-4) var(--space-2); background: var(--surface); }
+
+/* Menu lateral do computador */
+.app-lateral { flex: none; width: 240px; display: flex; flex-direction: column; gap: 2px; padding: var(--space-4) var(--space-3); overflow-y: auto; background: var(--surface-container-low); border-right: 1px solid var(--outline-variant); }
+.app-marca { display: flex; align-items: center; gap: var(--space-3); padding: 0 var(--space-3) var(--space-3); }
+.app-marca__textos { display: flex; flex-direction: column; min-width: 0; }
+.app-lateral__criar { justify-content: flex-start; margin-bottom: var(--space-3); }
+.app-lateral__espaco { flex-grow: 1; min-height: var(--space-6); }
+.app-lateral__eu { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-4) var(--space-3) 0; }
+.app-lateral__eu > span:last-child { display: flex; flex-direction: column; min-width: 0; }
+.app-topo-pc { padding-left: var(--space-6); flex: none; height: 56px; }
+.app-topo-pc__hoje { padding-right: var(--space-2); }
+
+/* Painel lateral do detalhe (computador) */
+.app-painel-scrim { position: fixed; inset: 0; z-index: 20; display: flex; justify-content: flex-end; background: var(--scrim); }
+.app-painel { display: flex; flex-direction: column; width: 100%; max-width: 600px; height: 100%; overflow-y: auto; overscroll-behavior: contain; border-radius: var(--radius-xl) 0 0 var(--radius-xl); background: var(--surface-overlay); color: var(--on-surface); box-shadow: var(--shadow-3); }
+.app-painel .cn-detail { max-width: none; flex: 1 0 auto; border: 0; border-radius: 0; background: transparent; box-shadow: none; padding: var(--space-6) var(--space-6) 0; }
+.app-painel .cn-field__control, .app-painel .cn-counter { background: var(--surface-overlay); }
+.app-painel .cn-avatars > .cn-avatar { box-shadow: 0 0 0 2px var(--surface-overlay); }
+
+/* Janela pop-up (Nova pendência): topo e rodapé fixos, o meio rola. No celular sobe de baixo. */
+.app-janela { display: flex; flex-direction: column; width: 100%; max-width: 560px; max-height: calc(100dvh - 48px); overflow: hidden; border-radius: var(--radius-xl); background: var(--surface-overlay); color: var(--on-surface); box-shadow: var(--shadow-3); }
+.app-janela--celular { max-width: none; max-height: 92dvh; border-radius: var(--radius-xl) var(--radius-xl) 0 0; padding-bottom: env(safe-area-inset-bottom); }
+.app-janela__topo { flex: none; display: flex; align-items: center; gap: var(--space-2); padding: var(--space-4) var(--space-3) var(--space-2) var(--space-6); }
+.app-janela__topo--voltar { padding-left: var(--space-3); }
+.app-janela__titulo { flex: 1; min-width: 0; margin: 0; font: 400 22px/28px var(--font-sans); }
+.app-janela__corpo { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; display: flex; flex-direction: column; gap: var(--space-6); padding: var(--space-2) var(--space-6) var(--space-6); }
+.app-janela__rodape { flex: none; padding: var(--space-4) var(--space-6); border-top: 1px solid var(--outline-variant); }
+.app-janela .cn-field__control, .app-janela .cn-counter { background: var(--surface-overlay); }
+.app-janela--celular .app-janela__topo { padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4); }
+.app-janela--celular .app-janela__corpo { padding: var(--space-2) var(--space-4) var(--space-5); }
+.app-janela--celular .app-janela__rodape { padding: var(--space-3) var(--space-4); }
+
+/* Lista de opções (tocar escolhe): ícone numa bolha, texto e seta ou check */
+.app-opcoes-lista { display: flex; flex-direction: column; }
+.app-opcoes-lista > .app-row { min-height: 64px; }
+.app-opcoes-lista > .app-row[aria-pressed="true"] { background: var(--secondary-container); color: var(--on-secondary-container); }
+.app-opcoes-lista > .app-row[aria-pressed="true"] .texto-apoio { color: inherit; }
+.app-bolha { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: var(--radius-full); background: var(--secondary-container); color: var(--on-secondary-container); }
+
+/* Rodapé de ações do detalhe fica preso embaixo enquanto rola */
+.cn-detail__foot { position: sticky; bottom: 0; z-index: 1; margin-top: auto; padding-bottom: var(--space-6); background: var(--surface); }
+.app-painel .cn-detail__foot { background: var(--surface-overlay); }
+.app-detalhe-celular { display: flex; flex-direction: column; align-items: center; }
+.app-detalhe-celular .cn-detail { padding-bottom: 0; }
+.app-detalhe-celular .cn-detail__foot { padding-bottom: var(--space-4); }
+
+/* Caixa clara para formulários dentro de cards e do detalhe */
+.app-caixa { display: flex; flex-direction: column; gap: var(--space-4); padding: var(--space-4); border-radius: var(--radius-md); background: var(--surface-container-low); }
+.app-caixa .cn-field__control, .app-caixa .cn-counter { background: var(--surface); }
+.app-bloco { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-3) var(--space-4); border: 1px solid var(--outline-variant); border-radius: var(--radius-md); }
+.app-pergunta { display: flex; flex-direction: column; gap: var(--space-2); }
+.app-erro { color: var(--error); }
+.app-linha-botoes { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.app-grade-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(160px, 100%), 1fr)); gap: var(--space-3); }
+.app-par { display: flex; flex-direction: column; gap: 2px; }
+.app-quebra { overflow-wrap: anywhere; white-space: pre-wrap; }
+
+/* Lista de pessoas e contatos */
+.app-lista { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
+.app-lista > li { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-3); padding: var(--space-3) 0; border-bottom: 1px solid var(--outline-variant); }
+.app-lista > li:last-child { border-bottom: 0; }
+.app-lista__texto { flex: 1 1 160px; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.app-lista__texto > * { overflow-wrap: anywhere; }
+
+/* Telas de entrada (login, sem acesso, primeiro acesso) */
+.app-entrada { min-height: 100%; overflow-y: auto; display: flex; align-items: center; justify-content: center; padding: var(--space-6) var(--space-4); background: var(--surface-container-low); }
+.app-entrada .cn-card { width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: var(--space-5); padding: var(--space-6); }
+.app-carregando { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-3); color: var(--on-surface-variant); }
+.app-carregando .cn-icon { color: var(--primary); animation: app-girar 1.2s linear infinite; }
+@keyframes app-girar { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .app-carregando .cn-icon { animation: none; } }
+
+/* Snackbar no celular fica acima da navegação inferior */
+.app--celular ~ .cn-snackbar--fixo, .app-snack-celular { bottom: calc(96px + env(safe-area-inset-bottom)); }

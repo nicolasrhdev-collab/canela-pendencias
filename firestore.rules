@@ -1,0 +1,49 @@
+rules_version = '2';
+
+// Canela · Pendências — só entra quem está na lista de pessoas.
+// Cada pessoa da lista tem um documento acesso/{e-mail}. O app mantém essa lista junto com Configurações → Pessoas.
+// Primeiro acesso: enquanto não existe config/dono, a primeira conta Google que entrar vira a dona
+// e entra na lista. Depois disso config/dono não pode mais ser trocado nem apagado.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function logado() {
+      return request.auth != null
+        && request.auth.token.email is string
+        && request.auth.token.email_verified == true;
+    }
+    function meuEmail() { return request.auth.token.email.lower(); }
+    function caminhoAcesso() { return /databases/$(database)/documents/acesso/$(meuEmail()); }
+    function caminhoDono() { return /databases/$(database)/documents/config/dono; }
+
+    // Ler: o e-mail já está na lista.
+    function permitido() { return logado() && exists(caminhoAcesso()); }
+    // Gravar: o e-mail continua na lista depois da gravação (vale para gravações em lote).
+    function permitidoDepois() { return logado() && existsAfter(caminhoAcesso()); }
+    function souDonoDepois() { return logado() && existsAfter(caminhoDono()) && getAfter(caminhoDono()).data.email == meuEmail(); }
+
+    match /config/dono {
+      allow get: if logado();
+      allow create: if logado() && !exists(caminhoDono()) && request.resource.data.email == meuEmail();
+      allow update, delete: if false;
+    }
+
+    match /config/geral {
+      allow read: if permitido();
+      allow write: if permitidoDepois();
+    }
+
+    match /acesso/{email} {
+      allow get: if logado() && (email == meuEmail() || permitido());
+      allow list: if permitido();
+      // Quem está na lista adiciona outras pessoas; o dono pode se colocar na lista no primeiro acesso.
+      allow create: if permitido() || (souDonoDepois() && email == meuEmail());
+      allow update, delete: if permitido();
+    }
+
+    match /{colecao}/{id} {
+      allow read: if colecao in ['pendencias', 'itens', 'pessoas', 'contatos', 'documentos', 'dados'] && permitido();
+      allow write: if colecao in ['pendencias', 'itens', 'pessoas', 'contatos', 'documentos', 'dados'] && permitidoDepois();
+    }
+  }
+}

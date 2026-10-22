@@ -1,0 +1,113 @@
+/* Canela · Pendências — tokens do sistema de design "Canela".
+   Única fonte de cores, fontes, espaços, raios, tamanhos e sombras do app.
+   O tema vai no atributo data-tema da raiz: "claro" ou "noturno"
+   (o index.html escolhe pelo aparelho antes de o app abrir). */
+
+:root {
+  --font-display: "Google Sans", Roboto, system-ui, sans-serif;
+  --font-sans: Roboto, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-icon: "Material Symbols Outlined";
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 28px;
+  --radius-full: 9999px;
+
+  --size-touch: 44px;
+  --size-field: 48px;
+  --size-button: 44px;
+  --size-button-lg: 48px;
+  --size-icon-button: 40px;
+  --size-chip: 40px;
+  --size-tag: 20px;
+  --size-avatar-sm: 24px;
+  --size-avatar-md: 32px;
+  --size-avatar-lg: 36px;
+
+  --opacity-hover: .08;
+  --opacity-pressed: .12;
+
+  --text-display-large: 400 57px/64px var(--font-display);
+  --text-display-medium: 400 45px/52px var(--font-display);
+  --text-display-small: 400 36px/44px var(--font-display);
+  --text-headline-large: 400 32px/40px var(--font-display);
+  --text-headline-medium: 400 28px/36px var(--font-display);
+  --text-headline-small: 400 24px/32px var(--font-display);
+  --text-title-large: 400 22px/28px var(--font-sans);
+  --text-title-medium: 500 16px/24px var(--font-sans);
+  --text-title-small: 500 14px/20px var(--font-sans);
+  --text-body-large: 400 16px/24px var(--font-sans);
+  --text-body-medium: 400 14px/20px var(--font-sans);
+  --text-body-small: 400 12px/16px var(--font-sans);
+  --text-label-large: 500 14px/20px var(--font-sans);
+  --text-label-medium: 500 12px/16px var(--font-sans);
+  --text-label-small: 500 11px/16px var(--font-sans);
+}
+
+/* Computador (mesmo corte de 960 px do app): mouse em vez de dedo, componentes mais compactos.
+   Os textos continuam do mesmo tamanho. */
+@media (min-width: 960px) {
+  :root {
+    --size-touch: 36px;
+    --size-field: 40px;
+    --size-button: 36px;
+    --size-button-lg: 40px;
+    --size-icon-button: 36px;
+    --size-chip: 32px;
+  }
+}
+
+/* Modo claro */
+:root,
+:root[data-tema="claro"] {
+  color-scheme: light;
+  --primary: #1a73e8; --on-primary: #ffffff; --primary-container: #e8f0fe; --on-primary-container: #1967d2;
+  --secondary: #4e5f7d; --on-secondary: #ffffff; --secondary-container: #d3e3fd; --on-secondary-container: #041e49;
+  --tertiary: #00747c; --on-tertiary: #ffffff; --tertiary-container: #ddf4f5; --on-tertiary-container: #005a60;
+  --error: #c5221f; --on-error: #ffffff;
+  --surface: #ffffff; --surface-container-low: #f8f9fa; --surface-container: #f1f3f4; --surface-container-high: #e8eaed; --surface-overlay: #ffffff;
+  --on-surface: #202124; --on-surface-variant: #5f6368;
+  --outline: #dadce0; --outline-variant: #e8eaed; --outline-strong: #80868b;
+  --inverse-surface: #303134; --inverse-on-surface: #f1f3f4; --inverse-primary: #8ab4f8;
+  --scrim: rgba(32,33,36,0.6); --focus-ring: #1a73e8;
+  --disabled-container: rgba(32,33,36,0.12); --on-disabled: rgba(32,33,36,0.38);
+  --pendente-container: #fef7e0; --on-pendente-container: #8a4e00; --pendente-dot: #f9ab00;
+  --aguardando-container: #e8f0fe; --on-aguardando-container: #1967d2; --aguardando-dot: #1a73e8;
+  --concluido-container: #e6f4ea; --on-concluido-container: #137333; --concluido-dot: #1e8e3e;
+  --atrasado-container: #fce8e6; --on-atrasado-container: #c5221f; --atrasado-dot: #d93025;
+  --shadow-1: 0 1px 2px rgba(60,64,67,0.3);
+  --shadow-2: 0 1px 2px rgba(60,64,67,0.3), 0 2px 6px 2px rgba(60,64,67,0.15);
+  --shadow-3: 0 1px 3px rgba(60,64,67,0.3), 0 4px 8px 3px rgba(60,64,67,0.15);
+}
+
+/* Modo noturno */
+:root[data-tema="noturno"] {
+  color-scheme: dark;
+  --primary: #8ab4f8; --on-primary: #202124; --primary-container: #3e4653; --on-primary-container: #aecbfa;
+  --secondary: #bcc7dc; --on-secondary: #26324a; --secondary-container: #004a77; --on-secondary-container: #c2e7ff;
+  --tertiary: #6fd3db; --on-tertiary: #00363a; --tertiary-container: #1c4a4e; --on-tertiary-container: #a6eef3;
+  --error: #f28b82; --on-error: #601410;
+  --surface: #202124; --surface-container-low: #28292c; --surface-container: #303134; --surface-container-high: #3c4043; --surface-overlay: #303134;
+  --on-surface: #e8eaed; --on-surface-variant: #9aa0a6;
+  --outline: #5f6368; --outline-variant: #3c4043; --outline-strong: #9aa0a6;
+  --inverse-surface: #e8eaed; --inverse-on-surface: #202124; --inverse-primary: #185abc;
+  --scrim: rgba(0,0,0,0.6); --focus-ring: #8ab4f8;
+  --disabled-container: rgba(232,234,237,0.12); --on-disabled: rgba(232,234,237,0.38);
+  --pendente-container: #3f3a26; --on-pendente-container: #fdd663; --pendente-dot: #fdd663;
+  --aguardando-container: #3e4653; --on-aguardando-container: #aecbfa; --aguardando-dot: #8ab4f8;
+  --concluido-container: #27392e; --on-concluido-container: #81c995; --concluido-dot: #81c995;
+  --atrasado-container: #432f2f; --on-atrasado-container: #f28b82; --atrasado-dot: #f28b82;
+  --shadow-1: 0 1px 2px rgba(0,0,0,0.6);
+  --shadow-2: 0 1px 2px rgba(0,0,0,0.6), 0 2px 6px 2px rgba(0,0,0,0.3);
+  --shadow-3: 0 1px 3px rgba(0,0,0,0.6), 0 4px 8px 3px rgba(0,0,0,0.3);
+}
